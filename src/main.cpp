@@ -8,8 +8,9 @@ Pass :Me10062019
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
-#include "Update.h"
+#include <Update.h>
 #include <ThingsBoard.h>
+#include "NonBlockingOutput.h"
 
 #define PIN_RS485_TXEN 5 // D5
 #define PIN_WATER_PUMP 4 // D4
@@ -18,11 +19,31 @@ Pass :Me10062019
 #define SOIL_MOISTURE_THRESHOLD_LOW 50.0f
 #define SOIL_MOISTURE_THRESHOLD_HIGH 80.0f
 
+/*
+PIN IO34 dan IO35 hanya bisa digunakan sebagai input
+
+const int relay1 = 34;          //Output Relay 1 ke Arnuino Pin D0
+const int relay2 = 35;          //Output Relay 2 ke Arnuino Pin D1
+const int relay3 = 32;          //Output Relay 3 ke Arnuino Pin D2
+const int relay4 = 33;          //Output Relay 4 ke Arnuino Pin D3
+const int relay5 = 25;          //Output Relay 5 ke Arnuino Pin D4
+const int relay6 = 26;          //Output Relay 6 ke Arnuino Pin D5
+const int relay7 = 27;          //Output Relay 7 ke Arnuino Pin D6
+const int relay8 = 14;          //Output Relay 8 ke Arnuino Pin D7*/
+
+#define NUM_OUTPUS 8
+// ini adalah pin yang digunakan untuk output
+const uint8_t arOutputsPin[NUM_OUTPUS] = {13, 12, 14, 27, 26, 25, 33, 32};
+// ini adalah durasi output dalam milisecond
+uint16_t arOutputOnDuration[NUM_OUTPUS] = {1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
+
+NonBlockingOutput nbOutput;
+
 constexpr uint16_t MAX_MESSAGE_SIZE = 128U;
-constexpr char WIFI_SSID[] = "Steff-IoT";
-constexpr char WIFI_PASSWORD[] = "steffiot123";
+constexpr char WIFI_SSID[] = "Wifi@ME Malang";
+constexpr char WIFI_PASSWORD[] = "memalang!";
 constexpr char THINGSBOARD_SERVER[] = "demo.thingsboard.io";
-constexpr char THINGSBOARD_TOKEN[] = "zkrrpswbjvvk3kivvxl1";
+constexpr char THINGSBOARD_TOKEN[] = "vHQWxvBgdgR5SUyzWeWo";
 constexpr uint16_t THINGSBOARD_PORT = 80U;
 constexpr char TEMPERATURE_KEY[] = "temperature";
 constexpr char HUMIDITY_KEY[] = "moisture";
@@ -73,6 +94,7 @@ void OnReadSensor()
       {
         Serial.println("Soil moisture is low, turn on water pump");
         digitalWrite(LED_BUILTIN, HIGH);
+        nbOutput.start();
       }
 
       if (fSoilMoisture>=SOIL_MOISTURE_THRESHOLD_HIGH)
@@ -97,6 +119,10 @@ void setup() {
 
   pinMode(PIN_WATER_PUMP, OUTPUT);
   digitalWrite(PIN_WATER_PUMP, LOW);
+  for (uint8_t i = 0; i < NUM_OUTPUS; i++) {
+    nbOutput.addOutput(arOutputsPin[i], arOutputOnDuration[i]);
+  }
+  nbOutput.begin();
 
   mbus.begin(1, Serial2);
 
@@ -134,7 +160,29 @@ void loop() {
   {
     lastMillis = nNow;
     OnReadSensor();
+/*}
+    if(HUMIDITY_KEY < 50)
+   {
+    digitalWrite(relay1, LOW);
+    digitalWrite(relay2, HIGH);
+    digitalWrite(relay3, LOW);
+    digitalWrite(relay4, HIGH);
+    digitalWrite(relay5, LOW);
+    digitalWrite(relay6, HIGH);
+    digitalWrite(relay7, LOW);
+    digitalWrite(relay8, HIGH);
+   }
+    else
+  {
+    digitalWrite(relay1, HIGH);
+    digitalWrite(relay2, HIGH);
+    digitalWrite(relay3, HIGH);
+    digitalWrite(relay4, HIGH);
+    digitalWrite(relay5, HIGH);
+    digitalWrite(relay6, HIGH);
+    digitalWrite(relay7, HIGH);
+    digitalWrite(relay8, HIGH);*/
   }
-
   tb.loop();
+  nbOutput.update();
 }
