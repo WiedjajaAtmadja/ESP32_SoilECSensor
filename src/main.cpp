@@ -40,10 +40,10 @@ uint16_t arOutputOnDuration[NUM_OUTPUS] = {1000, 1000, 1000, 1000, 1000, 1000, 1
 NonBlockingOutput nbOutput;
 
 constexpr uint16_t MAX_MESSAGE_SIZE = 128U;
-constexpr char WIFI_SSID[] = "Wifi@ME Malang";
-constexpr char WIFI_PASSWORD[] = "memalang!";
+constexpr char WIFI_SSID[] = "";
+constexpr char WIFI_PASSWORD[] = "";
 constexpr char THINGSBOARD_SERVER[] = "demo.thingsboard.io";
-constexpr char THINGSBOARD_TOKEN[] = "vHQWxvBgdgR5SUyzWeWo";
+constexpr char THINGSBOARD_TOKEN[] = "";
 constexpr uint16_t THINGSBOARD_PORT = 80U;
 constexpr char TEMPERATURE_KEY[] = "temperature";
 constexpr char HUMIDITY_KEY[] = "moisture";

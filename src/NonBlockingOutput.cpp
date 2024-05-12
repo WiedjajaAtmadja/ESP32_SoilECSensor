@@ -16,6 +16,8 @@ void NonBlockingOutput::addOutput(uint8_t nPin, uint16_t nDuration) {
 }
 
 void NonBlockingOutput::start() {
+  if (m_fStart)
+    return;
   m_fStart = true;
   m_nLastMillis = millis();
   m_nCurrentIndex = 0;
